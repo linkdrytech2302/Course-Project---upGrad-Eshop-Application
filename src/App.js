@@ -1,25 +1,52 @@
-import logo from './logo.svg';
-import './App.css';
+import {
+  RouterProvider,
+  createBrowserRouter,
+} from "react-router-dom";
+import { useState } from 'react';
+import Home from './components/Layout';
+import LoginPage from "./components/LoginPage";
+import HomePage from "./components/HomePage";
+import SignUpPage from "./components/SignUp";
+import { AuthContext } from "./components/Auth";
+import OrderStep from './components/OrderStep';
 
-function App() {
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Home />,
+    children: [
+      {
+        index: true,
+        element: <HomePage />
+      },
+      {
+        path: "login",
+        element: <LoginPage />
+      },
+      {
+        path: "sign-up",
+        element: <SignUpPage />
+      },
+      {
+        path: "product/:productId",
+        element: <OrderStep />
+      }
+    ]
+  },
+]);
+
+export default function App() {
+  const [authTokens, setAuthTokens] = useState(
+    !!window.sessionStorage.getItem("access-token")
+  );
+  const setTokens = (data) => {
+    window.sessionStorage.setItem("access-token", JSON.stringify(data));
+    setAuthTokens(data);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
+      <RouterProvider router={router} fallbackElement={<p>Initial Load...</p>} />
+    </AuthContext.Provider>
   );
 }
-
-export default App;
